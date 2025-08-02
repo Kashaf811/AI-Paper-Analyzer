@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Research Paper Analyzer - Intelligent Topic Analysis</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-brain"></i> AI Research Analyzer
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#papers">My Papers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#topics">Topics</a>
+                    </li>
+                    <li class="nav-item" id="authNav">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
+                    </li>
+                    <li class="nav-item" id="userNav" style="display: none;">
+                        <div class="user-info">
+                            <span id="userName"></span>
+                            <button class="btn btn-sm btn-secondary ms-2" onclick="logout()">Logout</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="container">
+            <h1 class="hero-title">AI-Powered Research Paper Analysis</h1>
+            <p class="hero-subtitle">Upload your research papers and get intelligent topic analysis, summaries, and research suggestions powered by advanced AI</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+
+        <!-- Upload Section -->
+        <section class="upload-section">
+            <div class="card">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-file-upload text-primary"></i>
+                        Upload Research Paper
+                    </h2>
+
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h4>Drag & Drop your research paper here</h4>
+                        <p class="text-muted mb-0">Supports PDF, DOCX, and TXT files</p>
+                        <input type="file" id="paperInput" accept=".pdf,.docx,.txt,.doc" style="display: none;">
+                    </div>
+
+                    <div id="paperPreview" class="mt-4" style="display: none;">
+                        <h5>Selected Paper:</h5>
+                        <div class="paper-info">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-alt fa-2x text-primary me-3"></i>
+                                <div>
+                                    <div class="fw-bold" id="paperFileName"></div>
+                                    <div class="text-muted" id="paperFileSize"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Paper Title (Optional)</label>
+                                    <input type="text" class="form-control" id="paperTitle" placeholder="Enter paper title">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Authors (Optional)</label>
+                                    <input type="text" class="form-control" id="paperAuthors" placeholder="Author 1, Author 2, ...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary btn-lg" id="analyzeBtn" disabled>
+                            <i class="fas fa-brain"></i>
+                            Analyze Paper
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Section -->
+        <section class="loading" id="loading">
+            <div class="card">
+                <div class="card-body">
+                    <div class="spinner"></div>
+                    <h4>Analyzing your research paper...</h4>
+                    <p class="text-muted mb-0">This may take a few moments while we extract text and perform AI analysis</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Result Section -->
+        <section class="result-section" id="resultSection">
+            <div class="card mb-5">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-chart-line text-success"></i>
+                        Analysis Results
+                    </h2>
+
+                    <!-- Summary -->
+                    <div class="analysis-section mb-4">
+                        <h4><i class="fas fa-file-alt text-primary"></i> Summary</h4>
+                        <div class="summary-box">
+                            <p id="paperSummary" class="mb-0"></p>
+                        </div>
+                    </div>
+
+                    <!-- Extracted Topics -->
+                    <div class="analysis-section mb-4">
+                        <h4><i class="fas fa-tags text-info"></i> Extracted Topics</h4>
+                        <div id="extractedTopics" class="topics-container">
+                            <!-- Topics will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Suggested Topics -->
+                    <div class="analysis-section mb-4">
+                        <h4><i class="fas fa-lightbulb text-warning"></i> Suggested Related Topics</h4>
+                        <div id="suggestedTopics" class="topics-container">
+                            <!-- Suggested topics will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Research Areas -->
+                    <div class="analysis-section mb-4" id="researchAreasSection" style="display: none;">
+                        <h4><i class="fas fa-search text-secondary"></i> Related Research Areas</h4>
+                        <div id="researchAreas" class="areas-container">
+                            <!-- Research areas will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button class="btn btn-outline-secondary" id="analyzeAnotherBtn">
+                            <i class="fas fa-plus"></i>
+                            Analyze Another Paper
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- My Papers Section -->
+        <section id="papers" class="py-5">
+            <div class="card">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-folder-open text-primary"></i>
+                        My Research Papers
+                    </h2>
+                    <p class="text-center text-muted mb-4">
+                        View and manage your uploaded research papers
+                    </p>
+
+                    <div id="papersGrid" class="papers-grid">
+                        <!-- Papers will be populated here -->
+                    </div>
+
+                    <div id="noPapersMessage" class="text-center text-muted" style="display: none;">
+                        <i class="fas fa-file-alt fa-3x mb-3"></i>
+                        <h5>No papers uploaded yet</h5>
+                        <p>Upload your first research paper to get started with AI analysis</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topics Section -->
+        <section id="topics" class="py-5">
+            <div class="card">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-sitemap text-primary"></i>
+                        Research Topics
+                    </h2>
+                    <p class="text-center text-muted mb-4">
+                        Explore available research topics and get personalized suggestions
+                    </p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4><i class="fas fa-list text-info"></i> Available Topics</h4>
+                            <div id="allTopics" class="topics-list">
+                                <!-- All topics will be populated here -->
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h4><i class="fas fa-star text-warning"></i> Suggested for You</h4>
+                            <div id="personalizedTopics" class="topics-list">
+                                <!-- Personalized suggestions will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">
+                        <i class="fas fa-user"></i>
+                        Login / Sign Up
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-3">Login</h6>
+                            <form id="loginForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" name="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control" name="password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 mb-2">Login</button>
+                            </form>
+                            <div class="text-center my-2">or</div>
+                            <button id="googleSignInBtn" class="btn btn-outline-danger w-100" type="button">
+                                <i class="fab fa-google me-2"></i> Sign in with Google
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="mb-3">Sign Up</h6>
+                            <form id="signupForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Name</label>
+                                    <input type="text" class="form-control" name="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" name="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control" name="password" required>
+                                </div>
+                                <button type="submit" class="btn btn-outline-primary w-100">Sign Up</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paper Details Modal -->
+    <div class="modal fade" id="paperModal" tabindex="-1" aria-labelledby="paperModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paperModalLabel">
+                        <i class="fas fa-file-alt"></i>
+                        Paper Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="paperDetails">
+                        <!-- Paper details will be populated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="deletePaperBtn">
+                        <i class="fas fa-trash"></i>
+                        Delete Paper
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-5">
+        <div class="container">
+            <div class="text-center">
+                <p>&copy; 2025 AI Research Paper Analyzer</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="./script.js"></script>
+</body>
+
+</html>
+
